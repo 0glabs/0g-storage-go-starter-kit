@@ -1,17 +1,10 @@
-// @title           0G Storage API Sandbox
-// @version         1.0
-// @description     Upload and download files using 0G Storage network. Click "Try it out" on any endpoint to test it.
-// @host           localhost:8080
-// @BasePath       /api/v1
-// @schemes        http https
-
 package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"path/filepath"
 	"time"
@@ -19,12 +12,7 @@ import (
 	"github.com/0glabs/0g-storage-client/common/blockchain"
 	"github.com/0glabs/0g-storage-client/indexer"
 	"github.com/0glabs/0g-storage-client/transfer"
-	_ "github.com/0glabs/0g-storage-starter/docs"
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"github.com/openweb3/web3go"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // Network configuration for 0G Testnet
@@ -39,74 +27,6 @@ type StorageClient struct {
 	web3Client    *web3go.Client
 	indexerClient *indexer.Client
 	ctx           context.Context
-}
-
-type UploadResponse struct {
-	RootHash string `json:"root_hash"`
-	TxHash   string `json:"tx_hash"`
-}
-
-// @Summary Upload a file to 0G Storage
-// @Description Upload a file to 0G Storage network
-// @Accept multipart/form-data
-// @Produce json
-// @Param file formData file true "File to upload"
-// @Success 200 {object} UploadResponse
-// @Router /upload [post]
-func (s *Server) handleUpload(c *gin.Context) {
-	file, err := c.FormFile("file")
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "No file provided"})
-		return
-	}
-
-	// Create temp file
-	tempFile := filepath.Join(os.TempDir(), file.Filename)
-	if err := c.SaveUploadedFile(file, tempFile); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
-		return
-	}
-	defer os.Remove(tempFile)
-
-	// Upload to 0G Storage
-	txHash, rootHash, err := s.client.UploadFile(tempFile)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, UploadResponse{
-		RootHash: rootHash,
-		TxHash:   txHash,
-	})
-}
-
-// @Summary Download a file from 0G Storage
-// @Description Download a file using its root hash
-// @Produce octet-stream
-// @Param root_hash path string true "Root hash of the file"
-// @Success 200 {file} binary
-// @Router /download/{root_hash} [get]
-func (s *Server) handleDownload(c *gin.Context) {
-	rootHash := c.Param("root_hash")
-	if rootHash == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Root hash is required"})
-		return
-	}
-
-	tempFile := filepath.Join(os.TempDir(), rootHash)
-	defer os.Remove(tempFile)
-
-	if err := s.client.DownloadFile(rootHash, tempFile); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.File(tempFile)
-}
-
-type Server struct {
-	client *StorageClient
 }
 
 func NewStorageClient(ctx context.Context, privateKey string, useTurbo bool) (*StorageClient, error) {
@@ -136,15 +56,15 @@ func (c *StorageClient) Close() {
 	}
 }
 
-func (c *StorageClient) UploadFile(filePath string) (string, string, error) {
+func (c *StorageClient) UploadFile(filePath string) (string, error) {
 	nodes, err := c.indexerClient.SelectNodes(c.ctx, 1, DefaultReplicas, nil)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to select storage nodes: %v", err)
+		return "", fmt.Errorf("failed to select storage nodes: %v", err)
 	}
 
 	uploader, err := transfer.NewUploader(c.ctx, c.web3Client, nodes)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to create uploader: %v", err)
+		return "", fmt.Errorf("failed to create uploader: %v", err)
 	}
 
 	ctx, cancel := context.WithTimeout(c.ctx, 5*time.Minute)
@@ -152,10 +72,11 @@ func (c *StorageClient) UploadFile(filePath string) (string, string, error) {
 
 	txHash, rootHash, err := uploader.UploadFile(ctx, filePath)
 	if err != nil {
-		return "", "", fmt.Errorf("upload failed: %v", err)
+		return "", fmt.Errorf("upload failed: %v", err)
 	}
+	fmt.Printf("Upload successful!\nTx hash: %s\nRoot hash: %s\n", txHash, rootHash)
 
-	return txHash.String(), rootHash.String(), nil
+	return rootHash.String(), nil
 }
 
 func (c *StorageClient) DownloadFile(rootHash, outputPath string) error {
@@ -184,75 +105,50 @@ func (c *StorageClient) DownloadFile(rootHash, outputPath string) error {
 }
 
 func main() {
-	// Load .env file
-	if err := godotenv.Load(); err != nil {
-		log.Println("⚠️  No .env file found. Please create one with your PRIVATE_KEY")
-		log.Println("📝 Example .env file content:")
-		log.Println("PRIVATE_KEY=your_private_key_here")
+	// Parse command line flags
+	privateKey := flag.String("key", "", "Private key for transactions (required)")
+	uploadPath := flag.String("upload", "", "Path to file to upload")
+	downloadHash := flag.String("download", "", "Root hash of file to download")
+	outputPath := flag.String("output", "", "Path to save downloaded file")
+	useTurbo := flag.Bool("turbo", false, "Use Turbo endpoint for faster but more expensive operations")
+	flag.Parse()
+
+	// Validate required flags
+	if *privateKey == "" {
+		log.Fatal("Private key is required. Use -key flag.")
 	}
 
-	privateKey := os.Getenv("PRIVATE_KEY")
-	if privateKey == "" {
-		log.Fatal("❌ PRIVATE_KEY environment variable is required. Please add it to .env file")
+	if (*uploadPath == "") == (*downloadHash == "") {
+		log.Fatal("Specify either -upload or -download (with -output), but not both or neither")
 	}
 
+	if *downloadHash != "" && *outputPath == "" {
+		log.Fatal("Output path (-output) is required when downloading")
+	}
+
+	// Create storage client
 	ctx := context.Background()
-	client, err := NewStorageClient(ctx, privateKey, false)
+	client, err := NewStorageClient(ctx, *privateKey, *useTurbo)
 	if err != nil {
 		log.Fatalf("Failed to initialize storage client: %v", err)
 	}
 	defer client.Close()
 
-	server := &Server{client: client}
-
-	// Initialize Gin router
-	gin.SetMode(gin.ReleaseMode)
-	r := gin.New()
-	r.Use(gin.Recovery())
-	r.Use(gin.LoggerWithConfig(gin.LoggerConfig{
-		SkipPaths: []string{"/swagger/*"},
-	}))
-
-	// CORS middleware for CodeSandbox
-	r.Use(func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
-			return
+	// Handle upload
+	if *uploadPath != "" {
+		rootHash, err := client.UploadFile(*uploadPath)
+		if err != nil {
+			log.Fatalf("Upload failed: %v", err)
 		}
-		c.Next()
-	})
-
-	v1 := r.Group("/api/v1")
-	{
-		v1.POST("/upload", server.handleUpload)
-		v1.GET("/download/:root_hash", server.handleDownload)
+		fmt.Printf("Upload successful!\nRoot hash: %s\n", rootHash)
+		return
 	}
 
-	// Swagger documentation endpoint with custom config
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, ginSwagger.URL("/swagger/doc.json")))
-
-	// Add welcome page with better instructions
-	r.GET("/", func(c *gin.Context) {
-		c.Header("Content-Type", "text/html")
-		c.String(http.StatusOK, `
-			<html>
-				<head>
-					<title>0G Storage API Sandbox</title>
-					<meta http-equiv="refresh" content="0;url=/swagger/index.html">
-				</head>
-				<body>
-					<p>Redirecting to Swagger UI...</p>
-				</body>
-			</html>
-		`)
-	})
-
-	port := ":8080"
-	log.Printf("🚀 Server starting on http://localhost%s", port)
-	log.Printf("📚 API Documentation: http://localhost%s/swagger/index.html", port)
-	log.Printf("💡 Tip: Click 'Open in New Window' in the browser preview to use Swagger UI")
-	log.Fatal(r.Run(port))
+	// Handle download
+	if *downloadHash != "" {
+		if err := client.DownloadFile(*downloadHash, *outputPath); err != nil {
+			log.Fatalf("Download failed: %v", err)
+		}
+		fmt.Printf("Download successful! File saved to: %s\n", *outputPath)
+	}
 }
