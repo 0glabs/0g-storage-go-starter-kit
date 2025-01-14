@@ -1,0 +1,53 @@
+basePath: /api/v1
+definitions:
+  main.UploadResponse:
+    properties:
+      root_hash:
+        type: string
+      tx_hash:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API Server for 0G Storage operations
+  title: 0G Storage API
+  version: "1.0"
+paths:
+  /download/{root_hash}:
+    get:
+      description: Download a file using its root hash
+      parameters:
+      - description: Root hash of the file
+        in: path
+        name: root_hash
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+      summary: Download a file from 0G Storage
+  /upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a file to 0G Storage network
+      parameters:
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.UploadResponse'
+      summary: Upload a file to 0G Storage
+swagger: "2.0"
