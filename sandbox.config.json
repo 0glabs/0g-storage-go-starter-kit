@@ -1,9 +1,0 @@
-{
-  "template": "go",
-  "container": {
-    "port": 8080,
-    "startScript": "go run main.go"
-  },
-  "hardReloadOnChange": true,
-  "infiniteLoopProtection": true
-} 
