@@ -145,4 +145,4 @@ go run main.go -key YOUR_PRIVATE_KEY -download ROOT_HASH -output path/to/save
 - Clean up temporary resources
 
 ## Next Steps
-Explore more SDK features in the [0G Storage Client documentation](https://github.com/0glabs/0g-storage-client). Learn more about the 0G Storage network [here](https://docs.0g.ai/0g-storage).
+Explore more SDK features in the [0G Storage Client documentation](https://github.com/0glabs/0g-storage-client). Learn more about the [0G Storage Network](https://docs.0g.ai/0g-storage).
