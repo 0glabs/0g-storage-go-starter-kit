@@ -182,14 +182,29 @@ What happens during download:
 
 ## Usage
 
-1. Start the server:
+1. Clone the repository:
+```bash
+git clone https://github.com/0glabs/0g-storage-go-starter-kit
+```
+
+2. Navigate to the project directory:
+```bash
+cd 0g-storage-go-sdk-starter-kit
+```
+
+3. Copy the .env.example file to .env and set your private key:
+```bash
+cp .env.example .env
+```
+
+4. Start the server:
 ```bash
 go run main.go
 ```
 
-2. Access Swagger UI: http://localhost:8080/swagger/index.html
+5. Access Swagger UI: http://localhost:8080/swagger/index.html
 
-3. Available Endpoints:
+6. Available Endpoints:
    - POST /api/v1/upload - Upload a file
      - Request: multipart/form-data with 'file' field
      - Response: JSON with root_hash and tx_hash
