@@ -2,7 +2,29 @@
 
 A starter kit demonstrating how to use the 0G Storage Go SDK for decentralized file storage. This example implements a simple CLI tool showcasing the core SDK functionalities.
 
-## Core Components
+## Repository Branches
+
+### 1. Master Branch (Current)
+REST API implementation using Gin framework with Swagger documentation.
+```bash
+git checkout master
+```
+
+- Features:
+  - RESTful endpoints for upload/download
+  - Swagger UI for API testing
+
+### 2. CLI Version Branch
+Command-line interface implementation available in the cli-version branch.
+```bash
+git checkout cli-version
+```
+
+- Features:
+  - Direct file upload/download via CLI
+  - Command-line flags for configuration
+
+## Core Components (CLI Version)
 ```go
 import (
     "github.com/0glabs/0g-storage-client/common/blockchain"  // Web3 client wrapper
@@ -123,4 +145,4 @@ go run main.go -key YOUR_PRIVATE_KEY -download ROOT_HASH -output path/to/save
 - Clean up temporary resources
 
 ## Next Steps
-Explore more SDK features in the [0G Storage Client documentation](https://github.com/0glabs/0g-storage-client). Learn more about the 0G Storage network [here](https://docs.0g.ai/build-with-0g/storage-sdk).
+Explore more SDK features in the [0G Storage Client documentation](https://github.com/0glabs/0g-storage-client). Learn more about the 0G Storage network [here](https://docs.0g.ai/0g-storage).
