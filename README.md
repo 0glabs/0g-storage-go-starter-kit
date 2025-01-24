@@ -116,9 +116,9 @@ What happens during upload:
 - File is received via multipart form upload
 - SDK selects available storage nodes
 - File is processed into chunks and a Merkle tree is created
-- Chunks are uploaded in parallel to storage nodes
+- Root hash are returned
 - Blockchain transaction is created and signed
-- Root hash and transaction hash are returned
+- Chunks are uploaded in parallel to storage nodes
 
 #### Download Implementation
 The download process retrieves files using their root hash. Here's the flow:
@@ -176,8 +176,8 @@ What happens during download:
 - SDK queries nodes storing the file
 - File chunks are downloaded in parallel
 - Each chunk is verified against the Merkle tree
-- Complete file is assembled and verified
 - File is streamed to the client
+- Complete file is assembled and verified
 
 
 ## Usage
