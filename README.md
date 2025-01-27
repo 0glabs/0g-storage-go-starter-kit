@@ -4,7 +4,7 @@ A starter kit demonstrating how to use the 0G Storage Go SDK for decentralized f
 
 ## Repository Branches
 
-### 1. Master Branch (Current)
+### 1. Master Branch
 REST API implementation using Gin framework with Swagger documentation.
 ```bash
 git checkout master
@@ -14,7 +14,7 @@ git checkout master
   - RESTful endpoints for upload/download
   - Swagger UI for API testing
 
-### 2. CLI Version Branch
+### 2. CLI Version Branch (Current)
 Command-line interface implementation available in the cli-version branch.
 ```bash
 git checkout cli-version
