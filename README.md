@@ -189,7 +189,7 @@ git clone https://github.com/0glabs/0g-storage-go-starter-kit
 
 2. Navigate to the project directory:
 ```bash
-cd 0g-storage-go-sdk-starter-kit
+cd 0g-storage-go-starter-kit
 ```
 
 3. Copy the .env.example file to .env and set your private key:
