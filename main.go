@@ -30,7 +30,7 @@ import (
 // Network configuration for 0G Testnet
 const (
 	EvmRPC             = "https://evmrpc-testnet.0g.ai"
-	IndexerRPCStandard = "https://indexer-storage-testnet-standard.0g.ai"
+	IndexerRPCStandard = "https://indexer-storage-testnet-turbo.0g.ai"
 	IndexerRPCTurbo    = "https://indexer-storage-testnet-turbo.0g.ai"
 	DefaultReplicas    = 1
 )
@@ -137,7 +137,7 @@ func (c *StorageClient) Close() {
 }
 
 func (c *StorageClient) UploadFile(filePath string) (string, string, error) {
-	nodes, err := c.indexerClient.SelectNodes(c.ctx, 1, DefaultReplicas, nil)
+	nodes, err := c.indexerClient.SelectNodes(c.ctx, 1, DefaultReplicas, []string{}, "max")
 	if err != nil {
 		return "", "", fmt.Errorf("failed to select storage nodes: %v", err)
 	}
@@ -159,7 +159,7 @@ func (c *StorageClient) UploadFile(filePath string) (string, string, error) {
 }
 
 func (c *StorageClient) DownloadFile(rootHash, outputPath string) error {
-	nodes, err := c.indexerClient.SelectNodes(c.ctx, 1, DefaultReplicas, nil)
+	nodes, err := c.indexerClient.SelectNodes(c.ctx, 1, DefaultReplicas, []string{}, "max")
 	if err != nil {
 		return fmt.Errorf("failed to select storage nodes: %v", err)
 	}
@@ -197,7 +197,7 @@ func main() {
 	}
 
 	ctx := context.Background()
-	client, err := NewStorageClient(ctx, privateKey, false)
+	client, err := NewStorageClient(ctx, privateKey, true)
 	if err != nil {
 		log.Fatalf("Failed to initialize storage client: %v", err)
 	}

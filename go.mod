@@ -3,7 +3,7 @@ module github.com/0glabs/0g-storage-starter
 go 1.21.13
 
 require (
-	github.com/0glabs/0g-storage-client v0.6.2
+	github.com/0glabs/0g-storage-client v0.6.9
 	github.com/gin-gonic/gin v1.10.0
 	github.com/joho/godotenv v1.5.1
 	github.com/openweb3/web3go v0.2.9

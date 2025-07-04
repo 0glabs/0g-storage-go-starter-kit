@@ -1,5 +1,5 @@
-github.com/0glabs/0g-storage-client v0.6.2 h1:aUF0Ta2YE0uWvKDmk6t/kfaM79o1ISNggGuUrGRaatk=
-github.com/0glabs/0g-storage-client v0.6.2/go.mod h1:Qt5AuIUPODYRu6/H/vsUTOVR14aAxI9G2FwxmRugZds=
+github.com/0glabs/0g-storage-client v0.6.9 h1:w8gl9+5HL4By4sqFb5nXG+MUoZJ7mpDTXtgLKJXk9Iw=
+github.com/0glabs/0g-storage-client v0.6.9/go.mod h1:Qt5AuIUPODYRu6/H/vsUTOVR14aAxI9G2FwxmRugZds=
 github.com/DataDog/zstd v1.4.5 h1:EndNeuB0l9syBZhut0wns3gV1hL8zX8LIu6ZiVHWLIQ=
 github.com/DataDog/zstd v1.4.5/go.mod h1:1jcaCB/ufaK+sKp1NBhlGmpz41jOoPQ35bpF36t7BBo=
 github.com/KyleBanks/depth v1.2.1 h1:5h8fQADFrWtarTdtDudMmGsC7GPbOAu6RVB3ffsVFHc=
